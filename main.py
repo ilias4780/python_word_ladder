@@ -8,10 +8,10 @@ def main():
         word_list = json.load(f)
 
     my_word_ladder = WordLadder(word_list)
-    my_word_ladder.starting_word = "warm"
-    my_word_ladder.ending_word = "cold"
+    my_word_ladder.starting_word = "wheat"
+    my_word_ladder.ending_word = "bread"
 
-    ladders = my_word_ladder.return_word_ladders()
+    my_word_ladder.find_shortest_word_ladder()
 
 
 if __name__ == '__main__':

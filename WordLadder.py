@@ -1,4 +1,4 @@
-from anytree import Node, RenderTree
+from anytree import Node
 
 
 class WordLadder:
@@ -118,53 +118,50 @@ class WordLadder:
         return [word for word in self._word_dictionary[len(word_arg)]
                 if self._are_strings_diff_by_only_one_char(word, word_arg)]
 
-    def _find_potential_next_nodes(self, working_word):
+    def _find_next_branch(self, current_nodes, depth):
         """
-        Finds all potential next nodes for the passed word. All potential next nodes are valid english words that
-        differ from the passed word by one character and are more similar to the end word than the passed one.
+        Finds the next branch of the ladder by finding all potential next nodes for each of the current nodes and
+        checking whether they have been visited again. If not, it adds them to the next level node list.
 
-        :param working_word: Word to be used as base for the potential next nodes
+        :param current_nodes: List of the current level nodes
+        :param depth: Depth of the current level
         :return: list
         """
-        potential_next_nodes = list()
-        char_differences = self._count_character_differences_in_strings(working_word, self.ending_word)
-        adjacent_words = self._find_adjacent_words(working_word)
-        for word in adjacent_words:
-            if self._count_character_differences_in_strings(word, self.ending_word) < char_differences:
-                potential_next_nodes.append(word)
-        return potential_next_nodes
+        self.word_ladder_dict[depth + 1] = list()
+        for node in current_nodes:
+            potential_next_nodes = self._find_adjacent_words(node)
+            for next_node in potential_next_nodes:
+                if next_node not in self._nodes.keys():
+                    self._nodes[str(next_node)] = Node(str(next_node), parent=self._nodes[str(node)])
+                    self.word_ladder_dict[depth + 1].append(next_node)
+        return self.word_ladder_dict[depth + 1]
 
-    def _find_word_ladders(self, word):
+    def find_shortest_word_ladder(self):
         """
-        Finds all the possible word ladders between then passed word and the ending word, in a recurring fashion.
-
-        :param word: Word to be used in the search for the ladder
-        :return: list
-        """
-        self.word_ladder_dict[word] = list()
-        potential_next_nodes = self._find_potential_next_nodes(word)
-        for node in potential_next_nodes:
-            self._nodes[str(node)] = Node(str(node), parent=self._nodes[str(word)])
-            self.word_ladder_dict[word].append(node)
-            if node == self.ending_word:
-                return
-            else:
-                self._find_word_ladders(node)
-
-    def return_word_ladders(self):
-        """
-        Finds all possible word ladders between the starting and ending word, for which in every step only one of the
+        Finds the shortest word ladder between the starting and ending word, for which in every step only one of the
         letters of the starting word changes in order to become eventually the ending word.
-        :return: list of lists
+
+        Prints the word ladder's branches and solution, along with information about it, while also returning the
+        word ladder in string format.
+        :return: str
         """
+        # find the word ladders' branches
+        self._nodes[str(self.starting_word)] = Node(self.starting_word)
+        self.word_ladder_dict[0] = [self.starting_word]
+        depth = 0
+        potential_next_nodes = [self.starting_word]
+        while self.ending_word not in potential_next_nodes:
+            print(f"Depth:{depth}, Nodes:{self.word_ladder_dict[depth]}")
+            potential_next_nodes = self._find_next_branch(potential_next_nodes, depth)
+            depth += 1
+        self.word_ladder_dict[depth] = potential_next_nodes
+        print(f"Depth:{depth}, Nodes:{potential_next_nodes}")
 
-        # find all the possible word ladders
-        self._nodes[str(self.starting_word)] = Node(str(self.starting_word))
-        self._find_word_ladders(self.starting_word)
+        # print out the word ladder and info
+        solution_ladder_string = str(self._nodes[self.ending_word]).split("'")[1][1:].replace("/", " -> ")
+        print(f"\nSolution ladder: {solution_ladder_string}")
+        print(f"Steps required: {depth}")
+        print(f"Nodes visited: {len(self._nodes)}")
 
-        # print out the word ladders tree
-        for pre, fill, node in RenderTree(self._nodes[str(self.starting_word)]):
-            print("%s%s" % (pre, node.name))
-
-        return self.word_ladder_dict
+        return solution_ladder_string
 

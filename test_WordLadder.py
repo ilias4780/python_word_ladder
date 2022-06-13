@@ -60,27 +60,29 @@ class TestWordLadder(unittest.TestCase):
     def test_find_word_ladder_one_char_diff(self):
         self.my_word_ladder.starting_word = "task"
         self.my_word_ladder.ending_word = "talk"
-        self.assertEqual(self.my_word_ladder.return_word_ladders(), {'task': ['talk']})
+        self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(), "task -> talk")
 
-    def test_find_word_ladder_one_char_common1(self):
+    def test_find_word_ladder_one_char_common(self):
         self.my_word_ladder.starting_word = "boot"
         self.my_word_ladder.ending_word = "shoe"
-        self.assertEqual(self.my_word_ladder.return_word_ladders(), {'boot': ['soot'],
-                                                                     'shot': ['shoe'],
-                                                                     'soot': ['shot']})
+        self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(), "boot -> soot -> shot -> shoe")
 
-    def test_find_word_ladder_one_char_common2(self):
+    def test_find_word_ladder_no_chars_common_four_letters(self):
         self.my_word_ladder.starting_word = "warm"
         self.my_word_ladder.ending_word = "cold"
-        self.assertEqual(self.my_word_ladder.return_word_ladders(),
-                         {'card': ['cord'],
-                          'cord': ['cold'],
-                          'corm': ['cord'],
-                          'ward': ['card', 'word'],
-                          'warm': ['ward', 'worm'],
-                          'wold': ['cold'],
-                          'word': ['cord', 'wold'],
-                          'worm': ['corm', 'word']})
+        self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(), "warm -> ward -> card -> cord -> cold")
+
+    def test_find_word_ladder_five_letters(self):
+        self.my_word_ladder.starting_word = "wheat"
+        self.my_word_ladder.ending_word = "bread"
+        self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(), "wheat -> cheat -> creat -> cread -> bread")
+
+    def test_find_word_ladder_five_letters_more_levels(self):
+        # currently slow unit test
+        self.my_word_ladder.starting_word = "table"
+        self.my_word_ladder.ending_word = "crown"
+        self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(),
+                         "table -> cable -> carle -> carls -> carps -> corps -> coops -> crops -> crows -> crown")
 
 
 if __name__ == '__main__':
