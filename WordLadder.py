@@ -1,3 +1,7 @@
+import copy
+import json
+import pathlib
+
 from anytree import Node
 
 
@@ -6,21 +10,17 @@ class WordLadder:
     Word ladder class that finds all possible, but also most efficient word path between a starting and an ending
     english word, when supplied with a list of english words.
 
-    :param word_list: List of english words (words should all be lowercase and not contain symbols or spaces)
+    :param word_dict: Dictionary of english words. As keys it has the length of the words (strings), as values it has
+    dictionaries. The inner dictionaries consist of the word as key and the adjacent words as values.
     """
 
-    def __init__(self, word_list: list):
-        self.word_list = word_list
-
+    def __init__(self, word_dict: dict):
         # create placeholders
         self._ending_word = None
         self._starting_word = None
-        self._word_dictionary = dict()
+        self.word_dictionary = word_dict
         self.word_ladder_dict = dict()
         self._nodes = dict()
-
-        # process the word list
-        self._process_word_list()
 
     @property
     def starting_word(self):
@@ -34,7 +34,7 @@ class WordLadder:
 
         :param new_starting_word: Starting word for the path calculation
         """
-        if new_starting_word in self.word_list:
+        if new_starting_word in self.word_dictionary[str(len(new_starting_word))].keys():
             self._starting_word = new_starting_word
         else:
             raise Exception("Please enter a valid starting word.")
@@ -58,21 +58,35 @@ class WordLadder:
                             f"{len(self.starting_word)} characters long.")
         elif new_ending_word == self.starting_word:
             raise Exception("Ending word cannot be the same as starting word.")
-        elif new_ending_word not in self.word_list:
+        elif new_ending_word not in self.word_dictionary[str(len(new_ending_word))].keys():
             raise Exception("Please enter a valid ending word.")
         else:
             self._ending_word = new_ending_word
 
-    def _process_word_list(self):
+    @staticmethod
+    def process_word_list(word_list):
         """
-        Processes the passed word list into a word dictionary, with keys the length of words and values the words with
-        such length.
+        Processes the passed word list into a word dictionary, with keys the length of words and values dictionaries
+        that have the words as keys and all adjacent words as their values.
+
+        :param word_list: List of words
+        :return: dict
         """
-        for word in self.word_list:
-            if len(word) not in self._word_dictionary:
-                self._word_dictionary[len(word)] = [word, ]
+        word_dictionary = dict()
+        for word in word_list:
+            if len(word) not in word_dictionary:
+                word_dictionary[len(word)] = {word: list()}
             else:
-                self._word_dictionary[len(word)].append(word)
+                word_dictionary[len(word)][word] = list()
+        processed_word_dictionary = copy.deepcopy(word_dictionary)
+        for length, word_dict in word_dictionary.items():
+            print(f"working for length {length}")
+            for word in word_dict.keys():
+                processed_word_dictionary[length][word] = WordLadder._find_adjacent_words(word, word_dictionary)
+
+        export_path = pathlib.Path(__file__).resolve().parent
+        with open(export_path.joinpath("word_dict.json"), "w") as f:
+            json.dump(processed_word_dictionary, f, indent=4)
 
     @staticmethod
     def _are_strings_diff_by_only_one_char(string1, string2):
@@ -93,30 +107,17 @@ class WordLadder:
         return check
 
     @staticmethod
-    def _count_character_differences_in_strings(string1, string2):
+    def _find_adjacent_words(word_arg, word_dict):
         """
-        Returns the number of character differences between two strings.
-
-        :param string1: first string
-        :param string2: second string to be checked against the first
-        :return: int
-        """
-        count = 0
-        for c1, c2 in zip(string1, string2):
-            if c1 != c2:
-                count += 1
-        return count
-
-    def _find_adjacent_words(self, word_arg):
-        """
-        Finds all words from the used word list that are the same length with the passed word argument and that only
+        Finds all words from the passed word dict that are the same length with the passed word argument and that only
         differ by one character.
 
         :param word_arg: Word to be used as base for the adjacent words
+        :param word_dict: Word dictionary containing all English words categorised by their length
         :return: list
         """
-        return [word for word in self._word_dictionary[len(word_arg)]
-                if self._are_strings_diff_by_only_one_char(word, word_arg)]
+        return [word for word in word_dict[len(word_arg)]
+                if WordLadder._are_strings_diff_by_only_one_char(word, word_arg)]
 
     def _find_next_branch(self, current_nodes, depth):
         """
@@ -129,7 +130,7 @@ class WordLadder:
         """
         self.word_ladder_dict[depth + 1] = list()
         for node in current_nodes:
-            potential_next_nodes = self._find_adjacent_words(node)
+            potential_next_nodes = self.word_dictionary[str(len(node))][node]
             for next_node in potential_next_nodes:
                 if next_node not in self._nodes.keys():
                     self._nodes[str(next_node)] = Node(str(next_node), parent=self._nodes[str(node)])

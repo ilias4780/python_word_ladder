@@ -7,9 +7,9 @@ from WordLadder import WordLadder
 class TestWordLadder(unittest.TestCase):
 
     def setUp(self) -> None:
-        with open("word_list.json") as f:
-            self.word_list = json.load(f)
-        self.my_word_ladder = WordLadder(self.word_list)
+        with open("word_dict.json") as f:
+            word_dict = json.load(f)
+        self.my_word_ladder = WordLadder(word_dict)
 
     def test_starting_word_validation_valid(self):
         self.my_word_ladder.starting_word = "playground"
@@ -50,13 +50,6 @@ class TestWordLadder(unittest.TestCase):
         self.assertFalse(WordLadder._are_strings_diff_by_only_one_char("play", "pkao"))
         self.assertFalse(WordLadder._are_strings_diff_by_only_one_char("play", "play"))
 
-    def test_char_difference_count(self):
-        self.assertEqual(WordLadder._count_character_differences_in_strings("play", "play"), 0)
-        self.assertEqual(WordLadder._count_character_differences_in_strings("paay", "play"), 1)
-        self.assertEqual(WordLadder._count_character_differences_in_strings("alay", "pley"), 2)
-        self.assertEqual(WordLadder._count_character_differences_in_strings("pkay", "alau"), 3)
-        self.assertEqual(WordLadder._count_character_differences_in_strings("play", "yalp"), 4)
-
     def test_find_word_ladder_one_char_diff(self):
         self.my_word_ladder.starting_word = "task"
         self.my_word_ladder.ending_word = "talk"
@@ -78,11 +71,17 @@ class TestWordLadder(unittest.TestCase):
         self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(), "wheat -> cheat -> creat -> cread -> bread")
 
     def test_find_word_ladder_five_letters_more_levels(self):
-        # currently slow unit test
         self.my_word_ladder.starting_word = "table"
         self.my_word_ladder.ending_word = "crown"
         self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(),
                          "table -> cable -> carle -> carls -> carps -> corps -> coops -> crops -> crows -> crown")
+
+    def test_find_word_ladder_difficult_case(self):
+        self.my_word_ladder.starting_word = "charge"
+        self.my_word_ladder.ending_word = "comedo"
+        self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(),
+                         "charge -> charre -> charrs -> chirrs -> shirrs -> shiers -> shyers -> sayers -> payers -> "
+                         "papers -> papery -> popery -> popely -> pomely -> comely -> comedy -> comedo")
 
     def test_unsolvable_scenario(self):
         self.my_word_ladder.starting_word = "electroencephalographically"

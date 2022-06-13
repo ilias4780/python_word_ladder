@@ -4,12 +4,12 @@ from WordLadder import WordLadder
 
 
 def main():
-    with open("word_list.json") as f:
-        word_list = json.load(f)
+    with open("word_dict.json") as f:
+        word_dict = json.load(f)
 
-    my_word_ladder = WordLadder(word_list)
-    my_word_ladder.starting_word = "wheat"
-    my_word_ladder.ending_word = "bread"
+    my_word_ladder = WordLadder(word_dict)
+    my_word_ladder.starting_word = "charge"
+    my_word_ladder.ending_word = "comedo"
 
     my_word_ladder.find_shortest_word_ladder()
 
