@@ -84,6 +84,12 @@ class TestWordLadder(unittest.TestCase):
         self.assertEqual(self.my_word_ladder.find_shortest_word_ladder(),
                          "table -> cable -> carle -> carls -> carps -> corps -> coops -> crops -> crows -> crown")
 
+    def test_unsolvable_scenario(self):
+        self.my_word_ladder.starting_word = "electroencephalographically"
+        self.my_word_ladder.ending_word = "hydroxydesoxycorticosterone"
+        with self.assertRaises(Exception):
+            self.my_word_ladder.find_shortest_word_ladder()
+
 
 if __name__ == '__main__':
     unittest.main()

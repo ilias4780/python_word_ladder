@@ -151,6 +151,8 @@ class WordLadder:
         depth = 0
         potential_next_nodes = [self.starting_word]
         while self.ending_word not in potential_next_nodes:
+            if not potential_next_nodes:
+                raise Exception("No next nodes found. Problem unsolvable with dictionary provided.")
             print(f"Depth:{depth}, Nodes:{self.word_ladder_dict[depth]}")
             potential_next_nodes = self._find_next_branch(potential_next_nodes, depth)
             depth += 1
